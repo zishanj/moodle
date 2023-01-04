@@ -76,6 +76,7 @@ class profile_define_base {
         $choices[PROFILE_VISIBLE_NONE]    = get_string('profilevisiblenone', 'admin');
         $choices[PROFILE_VISIBLE_PRIVATE] = get_string('profilevisibleprivate', 'admin');
         $choices[PROFILE_VISIBLE_TEACHERS] = get_string('profilevisibleteachers', 'admin');
+        $choices[PROFILE_VISIBLE_PARENTS] = get_string('profilevisibleparents', 'admin');
         $choices[PROFILE_VISIBLE_ALL]     = get_string('profilevisibleall', 'admin');
 
         $form->addElement('select', 'visible', get_string('profilevisible', 'admin'), $choices);

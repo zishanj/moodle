@@ -67,10 +67,12 @@ class fields_test extends \advanced_testcase {
                 'visible' => PROFILE_VISIBLE_NONE]);
         $generator->create_custom_profile_field(['datatype' => 'text', 'shortname' => 'd', 'name' => 'D',
                 'visible' => PROFILE_VISIBLE_TEACHERS]);
+        $generator->create_custom_profile_field(['datatype' => 'text', 'shortname' => 'e', 'name' => 'E',
+                'visible' => PROFILE_VISIBLE_PARENTS]);
 
         // Set the extra user fields to include email, department, and all custom profile fields.
         set_config('showuseridentity', 'email,department,profile_field_a,profile_field_b,' .
-                'profile_field_c,profile_field_d');
+                'profile_field_c,profile_field_d,profile_field_e');
         set_config('hiddenuserfields', 'email');
 
         // Create a test course and a student in the course.
@@ -83,7 +85,7 @@ class fields_test extends \advanced_testcase {
 
         // When no context is provided, it does no access checks and should return all specified.
         $this->assertEquals(['email', 'department', 'profile_field_a', 'profile_field_b',
-                'profile_field_c', 'profile_field_d'],
+                'profile_field_c', 'profile_field_d', 'profile_field_e'],
                 fields::get_identity_fields(null));
 
         // If you turn off custom profile fields, you don't get those.
@@ -92,7 +94,7 @@ class fields_test extends \advanced_testcase {
         // Request in context as an administator.
         $this->setAdminUser();
         $this->assertEquals(['email', 'department', 'profile_field_a', 'profile_field_b',
-                'profile_field_c', 'profile_field_d'],
+                'profile_field_c', 'profile_field_d', 'profile_field_e'],
                 fields::get_identity_fields($coursecontext));
         $this->assertEquals(['email', 'department'],
                 fields::get_identity_fields($coursecontext, false));
@@ -147,7 +149,7 @@ class fields_test extends \advanced_testcase {
         // Also give them permission to view all profile fields.
         role_change_permission($roleid, $usercontext, 'moodle/user:viewalldetails', CAP_ALLOW);
         $this->assertEquals(['email', 'department', 'profile_field_a', 'profile_field_b',
-                'profile_field_c', 'profile_field_d'],
+                'profile_field_c', 'profile_field_d', 'profile_field_e'],
                 fields::get_identity_fields($usercontext));
         $this->assertEquals(['email', 'department'],
                 fields::get_identity_fields($usercontext, false));

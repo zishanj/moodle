@@ -23,6 +23,13 @@
  */
 
 /**
+ * Visible to anyone who has the moodle/user:viewalldetails permission.
+ * Editable by the profile owner if they have the moodle/user:editownprofile capability
+ * or any user with the moodle/user:update capability.
+ */
+define('PROFILE_VISIBLE_PARENTS', '4');
+
+/**
  * Visible to anyone who has the moodle/site:viewuseridentity permission.
  * Editable by the profile owner if they have the moodle/user:editownprofile capability
  * or any user with the moodle/user:update capability.
@@ -448,6 +455,14 @@ class profile_field_base {
         $context = ($this->userid > 0) ? context_user::instance($this->userid) : context_system::instance();
 
         switch ($this->field->visible) {
+            case PROFILE_VISIBLE_PARENTS:
+                if ($this->is_signup_field() && (empty($this->userid) || isguestuser($this->userid))) {
+                    return true;
+                } else if ($this->userid == $USER->id) {
+                    return true;
+                } else {
+                    return has_capability('moodle/user:viewalldetails', $context);
+                }
             case PROFILE_VISIBLE_TEACHERS:
                 if ($this->is_signup_field() && (empty($this->userid) || isguestuser($this->userid))) {
                     return true;

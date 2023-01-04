@@ -381,6 +381,7 @@ class fields {
                     switch ($fieldinfo->visible ?? -1) {
                         case PROFILE_VISIBLE_NONE:
                         case PROFILE_VISIBLE_PRIVATE:
+                        case PROFILE_VISIBLE_PARENTS:
                             $allowed = !$context || has_capability('moodle/user:viewalldetails', $context);
                             break;
                         case PROFILE_VISIBLE_TEACHERS:

@@ -1053,6 +1053,7 @@ $string['profilevisibleall'] = 'Visible to everyone';
 $string['profilevisiblenone'] = 'Not visible';
 $string['profilevisibleprivate'] = 'Visible to user';
 $string['profilevisibleteachers'] = 'Visible to user, teachers and admins';
+$string['profilevisibleparents'] = 'Visible to user, parents and admins';
 $string['profiling'] = 'Profiling';
 $string['profilingallowall'] = 'Continuous profiling';
 $string['profilingallowall_help'] = 'If you enable this setting, then, at any moment, you can use the PROFILEALL parameter anywhere (PGC) to enable profiling for all the executed scripts along the Moodle session life. Analogously, you can use the PROFILEALLSTOP parameter to stop it.';
