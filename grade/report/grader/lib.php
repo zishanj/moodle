@@ -831,12 +831,18 @@ class grade_report_grader extends grade_report {
         $strerror = get_string('error');
 
         $viewfullnames = has_capability('moodle/site:viewfullnames', $this->context);
+        $hide_grade_items = [];
 
         foreach ($this->gtree->get_levels() as $key => $row) {
             $headingrow = new html_table_row();
             $headingrow->attributes['class'] = 'heading_name_row';
 
             foreach ($row as $columnkey => $element) {
+                if ( ! $this->is_grade_visible( $element ) ) {
+                    $hide_grade_items[] = $element['object']->id;
+                    continue;
+                }
+
                 $sortlink = clone($this->baseurl);
                 if (isset($element['object']->id)) {
                     $sortlink->param('sortitemid', $element['object']->id);
@@ -941,7 +947,7 @@ class grade_report_grader extends grade_report {
             $rows[] = $headingrow;
         }
 
-        $rows = $this->get_right_icons_row($rows);
+        $rows = $this->get_right_icons_row($rows, $hide_grade_items);
 
         // Preload scale objects for items with a scaleid and initialize tab indices
         $scaleslist = array();
@@ -995,6 +1001,10 @@ class grade_report_grader extends grade_report {
             $jsarguments['users'][$userid] = $fullname;
 
             foreach ($this->gtree->items as $itemid => $unused) {
+                if ( in_array( $itemid, $hide_grade_items ) ) {
+                    continue;
+                }
+
                 $item =& $this->gtree->items[$itemid];
                 $grade = $this->grades[$userid][$item->id];
 
@@ -1250,11 +1260,37 @@ class grade_report_grader extends grade_report {
 
         $rows = $this->get_right_range_row($rows);
         if ($displayaverages) {
-            $rows = $this->get_right_avg_row($rows, true);
-            $rows = $this->get_right_avg_row($rows);
+            $rows = $this->get_right_avg_row($rows, true, $hide_grade_items);
+            $rows = $this->get_right_avg_row($rows, false, $hide_grade_items);
         }
 
         return $rows;
+    }
+
+    /**
+     * Check if grade is visible to current user
+     * 
+     * @param object $element
+     * 
+     * @return bool
+     */
+    private function is_grade_visible( $element ) {
+        $itemtype = $element['object']->itemtype;
+        $itemmodule = $element['object']->itemmodule;
+        $iteminstance = $element['object']->iteminstance;
+        $itemnumber = $element['object']->itemnumber;
+        // Links only for module items that have valid instance, module and are
+        // called from grade_tree with valid modinfo
+        if ( $itemtype == 'mod' && $iteminstance && $itemmodule && $this->gtree->modinfo ) {
+            $instances = $this->gtree->modinfo->get_instances();
+            if ( !empty( $instances[$itemmodule][$iteminstance] ) ) {
+                $cm = $instances[$itemmodule][$iteminstance];
+                if ( ! $cm->uservisible ) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     /**
@@ -1394,7 +1430,7 @@ class grade_report_grader extends grade_report {
      * @param array $rows The Array of rows for the right part of the report
      * @return array Array of rows for the right part of the report
      */
-    public function get_right_icons_row($rows=array()) {
+    public function get_right_icons_row($rows=array(), $hide_grade_items=[]) {
         global $USER;
         if (!empty($USER->editing)) {
             $iconsrow = new html_table_row();
@@ -1402,6 +1438,10 @@ class grade_report_grader extends grade_report {
 
             foreach ($this->gtree->items as $itemid => $unused) {
                 // emulate grade element
+                if ( in_array( $itemid, $hide_grade_items ) ) {
+                    continue;
+                }
+
                 $item = $this->gtree->get_item($itemid);
 
                 $eid = $this->gtree->get_item_eid($item);
@@ -1456,7 +1496,7 @@ class grade_report_grader extends grade_report {
      * @param bool $grouponly Whether to return only group averages or all averages.
      * @return array Array of rows for the right part of the report
      */
-    public function get_right_avg_row($rows=array(), $grouponly=false) {
+    public function get_right_avg_row($rows=array(), $grouponly=false, $hide_grade_items=[]) {
         global $USER, $DB, $OUTPUT, $CFG;
 
         if (!$this->canviewhidden) {
@@ -1548,6 +1588,10 @@ class grade_report_grader extends grade_report {
             $avgrow->attributes['class'] = 'avg';
 
             foreach ($this->gtree->items as $itemid => $unused) {
+                if ( in_array( $itemid, $hide_grade_items ) ) {
+                    continue;
+                }
+
                 $item =& $this->gtree->items[$itemid];
 
                 if ($item->needsupdate) {
